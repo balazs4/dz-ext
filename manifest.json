@@ -1,0 +1,26 @@
+{
+    "manifest_version": 2,
+    "name": "Deezer.Extensions",
+    "short_name": "dz-ext",
+    "description": "Useful deezer extension pack (R.I.P Grooveshark)",
+    "permissions": [
+        "http://*.deezer.com/"
+    ],
+    "version": "0.0.0.1",
+
+    "icons": {
+        "128": "assets/icon_128.png"
+    },
+
+    "content_scripts": [{
+        "js": ["main.js"],
+        "matches": ["http://www.deezer.com/*"]
+    }],
+
+    "web_accessible_resources": [
+        "features/nomodal.js"
+    ],
+
+    "content_security_policy": "script-src 'self' http://localhost:4444; object-src 'self'"
+
+}

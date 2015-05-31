@@ -5,15 +5,18 @@
     var modalWatcher = setInterval(function() {
         tries++;
 
-        if (modal.ready) {
-            modal.close();
+        var close = $("#modal-close");
+
+        if ($(close).length > 0) {
+            $(close).trigger('click');
+            
             clearInterval(modalWatcher);
             console.info("Modal closed!");
 
-        } else if (tries === 50) {
+        } else if (tries === 100) {
             console.info("Modal watcher giving up...");
             clearInterval(modalWatcher);
         }
         
-    }, 200);
+    }, 500);
 })();

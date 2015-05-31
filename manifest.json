@@ -18,9 +18,10 @@
     }],
 
     "web_accessible_resources": [
-        "features/nomodal.js"
-    ],
+        "features/nomodal.js",
+        "features/hear-this-blacklist.js"
+    ]
 
-    "content_security_policy": "script-src 'self' http://localhost:4444; object-src 'self'"
+    //"content_security_policy": "script-src 'self' http://localhost:4444; object-src 'self'"
 
 }

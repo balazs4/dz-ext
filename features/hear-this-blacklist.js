@@ -18,6 +18,9 @@
         var blacklist = storage.getBlacklist();
 
         $(elements)
+            .not(".divider")
+            .not(".card-ads")
+            .not(".card-sponsor")
             .each(function() {
                 var id = $(this).attr("id");
 
@@ -50,10 +53,7 @@
     var init = function() {
         console.info("Setup " + storage.key);
 
-        var elements = $("div#content section")
-            .not(".divider")
-            .not(".card-ads")
-            .not(".card-sponsor");
+        var elements = $("div#content section");
 
         setup(elements);
 

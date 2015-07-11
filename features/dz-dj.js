@@ -83,9 +83,27 @@
             event.preventDefault();
             dzdj.promote();
             $(this)
-              .find("span.icon")
-              .addClass("active");
+                .find("span.icon")
+                .addClass("active");
         });
+    }
+    var removeShareButton = function() {
+        $("a#dzdj-share").remove();
+    }
+
+    var refreshToggleButton = function(isOn) {
+
+        if ($("a.nav-link[data-type='apps']").length > 0) {
+            var button = $("a.nav-link[data-type='apps']")[0];
+            $(button).removeAttr("data-type");
+            $(button).find("span.icon").removeClass("icon-app");
+            $(button).find("span.icon").addClass("icon-share");
+            $(button).find("span").not("span.icon").attr("id", "message");
+            $(button).attr("id", "dzdj-toggle");
+            $(button).attr("onclick", "dzdj.toggle();")
+        }
+
+        $("#dzdj-toggle").find("#message").text(isOn ? "DEEZER DJ: ON" : "DEEZER DJ: OFF");
     }
 
     var config = {
@@ -101,19 +119,26 @@
             connect(function(fb) {
                 config.observer = registerObserver(browser, function(s) {
                     addShareButton();
+                    //this.promote(); // Auto promoting
                 });
                 fb.on("child_added", onNewSong);
+                addShareButton();
+                refreshToggleButton(true);
+
                 log("Subscribed");
                 config.firebase = fb;
             });
         },
         off: function() {
+            refreshToggleButton(false);
             config.firebase.off("child_added", onNewSong);
             config.firebase.unauth();
             delete(config.firebase);
 
             config.observer.disconnect();
             delete(config.observer);
+
+            removeShareButton();
 
             log("Unsubscribed");
         },
@@ -127,16 +152,22 @@
             var data = {
                 date: new Date().toString(),
                 user: this.getUser(),
-                song: "'" + song.SNG_TITLE + "' by '" + song.ART_NAME + "'",
+                song: song.SNG_TITLE + " // " + song.ART_NAME,
                 raw: song,
             };
             config.firebase.push(data);
+        },
+        toggle: function() {
+            if (this.isOn()) {
+                this.off();
+            } else {
+                this.on();
+            }
         }
     };
 
     setTimeout(function() {
-        dj.on();
-        addShareButton();
+        dj.on(); //Auto-on
         browser.dzdj = dj;
     }, 1000);
 

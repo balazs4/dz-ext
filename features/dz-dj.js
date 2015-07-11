@@ -1,20 +1,18 @@
-(function() {
+(function($, browser, dzPlayer) {
+    var log = function(text) {
+        console.info("[dzdj] " + text);
+    }
+
     var dependencies = [
         "https://cdn.firebase.com/js/client/2.2.7/firebase.js"
     ];
 
     dependencies.forEach(function(item) {
-        var s = window.document.createElement('script');
+        var s = browser.document.createElement('script');
         s.src = item;
-        window.document.head.appendChild(s);
+        browser.document.head.appendChild(s);
+        log("DI done");
     });
-})();
-
-
-(function($, browser, dzPlayer) {
-    var log = function(text) {
-        console.info("[dzdj] " + text);
-    }
 
     log("Init...");
 
@@ -59,10 +57,10 @@
         });
 
         if (known) {
-            return;
+            //return;
         }
 
-        dzPlayer.addNextTracks([song])
+        dzPlayer.addNextTracks([song], dzPlayer.context);
     };
 
     var addShareButton = function() {
@@ -87,6 +85,7 @@
                 .addClass("active");
         });
     }
+
     var removeShareButton = function() {
         $("a#dzdj-share").remove();
     }
@@ -155,6 +154,7 @@
                 song: song.SNG_TITLE + " // " + song.ART_NAME,
                 raw: song,
             };
+            
             config.firebase.push(data);
         },
         toggle: function() {
@@ -170,7 +170,7 @@
         dj.on(); //Auto-on
         browser.dzdj = dj;
     }, 1000);
-    
+
     refreshToggleButton(false);
 
 })($, window, window.dzPlayer);

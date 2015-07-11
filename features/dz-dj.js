@@ -13,7 +13,7 @@
 
 (function($, browser, dzPlayer) {
     var log = function(text) {
-        console.info("[dz-dj] " + text);
+        console.info("[dzdj] " + text);
     }
 
     log("Init...");
@@ -55,18 +55,37 @@
         var song = item.raw;
 
         var known = dzPlayer.getTrackList().some(function(s) {
-          s.SNG_TITLE == song.SNG_TITLE;
+            return s.SNG_ID == song.SNG_ID;
         });
 
-        if (known){
-          return;
+        if (known) {
+            return;
         }
 
         dzPlayer.addNextTracks([song])
     };
 
-    var onSongChange = function(s) {
-      //TODO: add promote control to the UI
+    var addShareButton = function() {
+
+        if ($("a#dzdj-share").length) {
+            $("a#dzdj-share").find("span.icon").removeClass("active");
+            return;
+        }
+
+        var controls = $("div.player-actions")[0];
+
+        $(controls)
+            .append('<a id="dzdj-share" class="evt-over evt-out action" href="#" title="Deezer DJ"> <span class="icon-32 icon-stack icon-stack-hover icon-stack-circle"> <span class="icon icon-share"> </span> </span> </a>');
+        $(controls)
+            .removeAttr("data-action");
+
+        $("a#dzdj-share").click(function(event) {
+            event.preventDefault();
+            dzdj.promote();
+            $(this)
+              .find("span.icon")
+              .addClass("active");
+        });
     }
 
     var config = {
@@ -80,7 +99,9 @@
         },
         on: function() {
             connect(function(fb) {
-                config.observer = registerObserver(browser, onSongChange);
+                config.observer = registerObserver(browser, function(s) {
+                    addShareButton();
+                });
                 fb.on("child_added", onNewSong);
                 log("Subscribed");
                 config.firebase = fb;
@@ -115,6 +136,7 @@
 
     setTimeout(function() {
         dj.on();
+        addShareButton();
         browser.dzdj = dj;
     }, 1000);
 

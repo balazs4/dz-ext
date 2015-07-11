@@ -170,5 +170,7 @@
         dj.on(); //Auto-on
         browser.dzdj = dj;
     }, 1000);
+    
+    refreshToggleButton(false);
 
 })($, window, window.dzPlayer);

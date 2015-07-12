@@ -31,8 +31,8 @@
 
     var connect = function(onSuccess) {
         var secret = {
-            dbname: "dz-dj",
-            auth: "RfpZoSMvdEJmsl2g1olO58wrUPMCubGBm8lmqwoL"
+            dbname: "dzdj",
+            auth: "6ZSDzLtPVU6RQF1xakF99ODdgRIcWzP3he5rrl3X"
         };
 
         var fb = new Firebase("http://" + secret.dbname + ".firebaseio.com/");
@@ -50,14 +50,14 @@
     var onNewSong = function(data) {
         var item = data.exportVal();
 
-        var song = item.raw;
+        var song = JSON.parse(item.raw);
 
         var known = dzPlayer.getTrackList().some(function(s) {
             return s.SNG_ID == song.SNG_ID;
         });
 
         if (known) {
-            //return;
+            return;
         }
 
         dzPlayer.addNextTracks([song], dzPlayer.context);
@@ -90,7 +90,7 @@
         $("a#dzdj-share").remove();
     }
 
-    var refreshToggleButton = function(isOn) {
+    var refreshToggleButton = function(message) {
 
         if ($("a.nav-link[data-type='apps']").length > 0) {
             var button = $("a.nav-link[data-type='apps']")[0];
@@ -102,7 +102,9 @@
             $(button).attr("onclick", "dzdj.toggle();")
         }
 
-        $("#dzdj-toggle").find("#message").text(isOn ? "DEEZER DJ: ON" : "DEEZER DJ: OFF");
+        $("#dzdj-toggle")
+            .find("#message")
+            .text(message);
     }
 
     var config = {
@@ -115,6 +117,7 @@
             return $("#naboo_menu_collection_user_name").text() || "Unknown user";
         },
         on: function() {
+            refreshToggleButton("Connecting...");
             connect(function(fb) {
                 config.observer = registerObserver(browser, function(s) {
                     addShareButton();
@@ -122,14 +125,14 @@
                 });
                 fb.on("child_added", onNewSong);
                 addShareButton();
-                refreshToggleButton(true);
+                refreshToggleButton("Online");
 
                 log("Subscribed");
                 config.firebase = fb;
             });
         },
         off: function() {
-            refreshToggleButton(false);
+            refreshToggleButton("Offline");
             config.firebase.off("child_added", onNewSong);
             config.firebase.unauth();
             delete(config.firebase);
@@ -152,9 +155,9 @@
                 date: new Date().toString(),
                 user: this.getUser(),
                 song: song.SNG_TITLE + " // " + song.ART_NAME,
-                raw: song,
+                raw: JSON.stringify(song),
             };
-            
+
             config.firebase.push(data);
         },
         toggle: function() {
@@ -167,10 +170,8 @@
     };
 
     setTimeout(function() {
-        dj.on(); //Auto-on
         browser.dzdj = dj;
+        refreshToggleButton("Offline");
     }, 1000);
-
-    refreshToggleButton(false);
 
 })($, window, window.dzPlayer);

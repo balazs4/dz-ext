@@ -1,4 +1,4 @@
-(function($, browser, dzPlayer) {
+(function($, browser, dzPlayer, notification) {
   var log = function(text) {
     console.info("[dzdj] " + text);
   }
@@ -67,6 +67,9 @@
 
     log(song);
     dzPlayer.addNextTracks([song], dzPlayer.context);
+
+
+
   }
 
   var onNewSong = function(data) {
@@ -76,6 +79,12 @@
       return;
     }
     addSongToPlaylist(item);
+
+    setTimeout(function() {
+      $('h2', notification.content).text(item.song);
+      $('p', notification.content).text(item.user);
+    }, 1000);
+
   };
 
   var onSnapshot = function(data) {
@@ -84,6 +93,14 @@
     if (restore != true) {
       return;
     }
+    browser.localStorage.setItem('dzdj.restore', 0);
+
+    if ($("div.nano-card-options").length == 0) {
+      $("button[data-type='queuelist']").click();
+    }
+
+    $("div.nano-card-options").click();
+    $("button[data-type='edit_delete']").click();
 
     var root = data.exportVal();
 
@@ -92,6 +109,16 @@
       log(song);
       addSongToPlaylist(song);
     });
+
+    if (dzPlayer.playing) {
+      return;
+    }
+
+    setTimeout(function() {
+      $("div.nano-card-options")[0].click();
+      $("button[data-type='edit_delete']").click();
+    }, 500);
+
   }
 
   var addShareButton = function() {
@@ -136,6 +163,12 @@
     $("#dzdj-toggle")
       .find("#message")
       .text(message);
+
+
+    notification.display({}, {
+      message: "Deezer DJ " + message
+    });
+
   }
 
   var dj = {
@@ -202,6 +235,7 @@
         raw: JSON.stringify(song),
       };
 
+
       config.firebase.push(data);
     },
     toggle: function() {
@@ -218,4 +252,4 @@
     refreshToggleButton("Offline");
   }, 1000);
 
-})($, window, window.dzPlayer);
+})(window.jQuery, window, window.dzPlayer, window.notification);

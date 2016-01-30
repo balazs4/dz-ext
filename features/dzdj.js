@@ -54,14 +54,7 @@
     });
   };
 
-  var onNewSong = function(data) {
-    var item = data.exportVal();
-
-    if (Date.parse(item.date) < config.subscribedSince) {
-      //just an old song
-      return;
-    }
-
+  var addSongToPlaylist = function(item) {
     var song = JSON.parse(item.raw);
 
     var known = dzPlayer.getTrackList().some(function(s) {
@@ -74,7 +67,32 @@
 
     log(song);
     dzPlayer.addNextTracks([song], dzPlayer.context);
+  }
+
+  var onNewSong = function(data) {
+    var item = data.exportVal();
+
+    if (Date.parse(item.date) < config.subscribedSince) {
+      return;
+    }
+    addSongToPlaylist(item);
   };
+
+  var onSnapshot = function(data) {
+    var restore = browser.localStorage.getItem('dzdj.restore');
+
+    if (restore != true) {
+      return;
+    }
+
+    var root = data.exportVal();
+
+    Object.keys(root).forEach(function(key) {
+      var song = root[key];
+      log(song);
+      addSongToPlaylist(song);
+    });
+  }
 
   var addShareButton = function() {
 
@@ -146,6 +164,8 @@
         config.subscribedSince = Date.parse(new Date());
 
         fb.on("child_added", onNewSong);
+        fb.on("value", onSnapshot);
+
         addShareButton();
         refreshToggleButton("Online");
 
@@ -155,6 +175,7 @@
     },
     off: function() {
       refreshToggleButton("Offline");
+      config.firebase.off("value", onSnapshot);
       config.firebase.off("child_added", onNewSong);
       config.firebase.unauth();
       delete(config.firebase);
@@ -162,6 +183,7 @@
       config.observer.disconnect();
       delete(config.observer);
 
+      delete(config.subscribedSince);
       removeShareButton();
 
       log("Unsubscribed");
